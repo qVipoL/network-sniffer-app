@@ -5,7 +5,7 @@ OBJ := obj
 SRCS := $(wildcard $(SRC)/*.c)
 OBJS := $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(SRCS))
 
-BIN_DIR := build
+BIN_DIR := bin
 BIN := $(BIN_DIR)/todo_app
 
 all: dirs $(BIN)

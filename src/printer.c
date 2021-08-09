@@ -6,10 +6,10 @@
 
 static void print_ethernet_header(char *buffer, size_t size);
 static void print_ip_header(char *buffer, size_t size);
+static void print_hex_data(char *buffer, size_t size);
 static void print_tcp_packet(char *buffer, size_t size);
-// static void print_data(char *buffer, size_t size);
 
-static (*protocol_to_print[PROTOCOLS])(char *buffer, size_t size) = {
+static void (*protocol_to_print[PROTOCOLS])(char *buffer, size_t size) = {
     NULL,
     NULL,
     NULL,
@@ -37,31 +37,31 @@ static void print_ethernet_header(char *buffer, size_t size) {
 }
 
 static void print_ip_header(char *buffer, size_t size) {
-    int ip_header_size;
     struct sockaddr_in source, dest;
-    struct iphdr *iph = (struct iphdr *)(buffer + sizeof(struct ethhdr));
+    struct iphdr *ip_header = (struct iphdr *)(buffer + sizeof(struct ethhdr));
 
     print_ethernet_header(buffer, size);
 
-    ip_header_size = iph->ihl * 4;
-
     memset(&source, 0, sizeof(source));
-    source.sin_addr.s_addr = iph->saddr;
+    source.sin_addr.s_addr = ip_header->saddr;
 
     memset(&dest, 0, sizeof(dest));
-    dest.sin_addr.s_addr = iph->daddr;
+    dest.sin_addr.s_addr = ip_header->daddr;
 
     printf("\nIP Header\n");
-    printf("\t|-Version             : %d\n", (int)iph->version);
-    printf("\t|-Inter Header Length : %d DWORDS or %d Bytes\n", (int)iph->ihl, ((int)(iph->ihl)) * 4);
-    printf("\t|-Type Of Service     : %d\n", (int)iph->tos);
-    printf("\t|-Total Length        : %d Bytes\n", ntohs(iph->tot_len));
-    printf("\t|-Identification      : %d\n", ntohs(iph->id));
-    printf("\t|-Time To Live        : %d\n", (int)iph->ttl);
-    printf("\t|-Protocol            : %d\n", (int)iph->protocol);
-    printf("\t|-Header Checksum     : %d\n", ntohs(iph->check));
+    printf("\t|-Version             : %d\n", (int)ip_header->version);
+    printf("\t|-Inter Header Length : %d DWORDS or %d Bytes\n", (int)ip_header->ihl, ((int)(ip_header->ihl)) * 4);
+    printf("\t|-Type Of Service     : %d\n", (int)ip_header->tos);
+    printf("\t|-Total Length        : %d Bytes\n", ntohs(ip_header->tot_len));
+    printf("\t|-Identification      : %d\n", ntohs(ip_header->id));
+    printf("\t|-Time To Live        : %d\n", (int)ip_header->ttl);
+    printf("\t|-Protocol            : %d\n", (int)ip_header->protocol);
+    printf("\t|-Header Checksum     : %d\n", ntohs(ip_header->check));
     printf("\t|-Source IP           : %s\n", inet_ntoa(source.sin_addr));
     printf("\t|-Destination IP      : %s\n", inet_ntoa(dest.sin_addr));
+}
+
+static void print_hex_data(char *buffer, size_t size) {
 }
 
 static void print_tcp_packet(char *buffer, size_t size) {
@@ -78,7 +78,7 @@ static void print_tcp_packet(char *buffer, size_t size) {
 
     print_ip_header(buffer, size);
 
-    printf("\nTCP Header\n");
+    printf("TCP Header\n");
     printf("\t|-Source Port        : %u\n", ntohs(tcp_header->source));
     printf("\t|-Destination Port   : %u\n", ntohs(tcp_header->dest));
     printf("\t|-Sequence Number    : %u\n", ntohl(tcp_header->seq));
@@ -95,7 +95,7 @@ static void print_tcp_packet(char *buffer, size_t size) {
     printf("\t|-Checksum          : %d\n", ntohs(tcp_header->check));
     printf("\t|-Urgent Pointer    : %d\n", tcp_header->urg_ptr);
     printf("\nData\n");
-    // print_data(buffer + tcp_header_size, size - tcp_header_size);
+    print_hex_data(buffer + tcp_header_size, size - tcp_header_size);
 
     printf("\n**********************************************************\n");
 }
