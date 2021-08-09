@@ -7,6 +7,7 @@
 static void print_ethernet_header(char *buffer, size_t size);
 static void print_ip_header(char *buffer, size_t size);
 static void print_tcp_packet(char *buffer, size_t size);
+// static void print_data(char *buffer, size_t size);
 
 static (*protocol_to_print[PROTOCOLS])(char *buffer, size_t size) = {
     NULL,
@@ -94,7 +95,7 @@ static void print_tcp_packet(char *buffer, size_t size) {
     printf("\t|-Checksum          : %d\n", ntohs(tcp_header->check));
     printf("\t|-Urgent Pointer    : %d\n", tcp_header->urg_ptr);
     printf("\nData\n");
-    print_data(buffer + tcp_header_size, size - tcp_header_size);
+    // print_data(buffer + tcp_header_size, size - tcp_header_size);
 
     printf("\n**********************************************************\n");
 }
