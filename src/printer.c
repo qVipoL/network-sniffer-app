@@ -2,7 +2,7 @@
 
 #include "../include/std_include.h"
 
-#define PROTOCOLS
+#define PROTOCOLS 7
 
 static void print_ethernet_header(char *buffer, size_t size);
 static void print_ip_header(char *buffer, size_t size);
@@ -16,7 +16,8 @@ static void (*protocol_to_print[PROTOCOLS])(char *buffer, size_t size) = {
     NULL,
     NULL,
     NULL,
-    print_tcp_packet};
+    print_tcp_packet  // 6 - TCP protocol
+};
 
 void print_packet(char *buffer, size_t size) {
     struct iphdr *ip_header = (struct iphdr *)(buffer + sizeof(struct ethhdr));
@@ -62,6 +63,20 @@ static void print_ip_header(char *buffer, size_t size) {
 }
 
 static void print_hex_data(char *buffer, size_t size) {
+    int i, j = 0;
+
+    for (i = 0; i < size; i++) {
+        if (i % 16 == 0) {
+            printf("  ");
+            printf("%.2X", (unsigned char)buffer[i]);
+            j++;
+
+            if (j == 15) {
+                j = 0;
+                printf("\n");
+            }
+        }
+    }
 }
 
 static void print_tcp_packet(char *buffer, size_t size) {
