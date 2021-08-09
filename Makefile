@@ -6,7 +6,7 @@ SRCS := $(wildcard $(SRC)/*.c)
 OBJS := $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(SRCS))
 
 BIN_DIR := bin
-BIN := $(BIN_DIR)/todo_app
+BIN := $(BIN_DIR)/sniffer-app
 
 all: dirs $(BIN)
 
@@ -19,6 +19,9 @@ $(BIN): $(OBJS)
 
 $(OBJ)/%.o: $(SRC)/%.c
 	$(CC) $(FLAGS) -c $< -o $@
+
+run:
+	sudo ./bin/
 
 clean:
 	$(RM) -r $(BIN_DIR)/* $(OBJ)/*

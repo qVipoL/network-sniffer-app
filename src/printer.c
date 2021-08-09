@@ -30,7 +30,7 @@ void print_packet(char *buffer, size_t size) {
 static void print_ethernet_header(char *buffer, size_t size) {
     struct ethhdr *ethernet_header = (struct ethhdr *)buffer;
 
-    printf("\nEthernet Header\n");
+    printf("Ethernet Header\n");
     printf("\t|-Source Address      : %.2X-%.2X-%.2X-%.2X-%.2X-%.2X\n", ethernet_header->h_source[0], ethernet_header->h_source[1], ethernet_header->h_source[2], ethernet_header->h_source[3], ethernet_header->h_source[4], ethernet_header->h_source[5]);
     printf("\t|-Destination Address : %.2X-%.2X-%.2X-%.2X-%.2X-%.2X\n", ethernet_header->h_dest[0], ethernet_header->h_dest[1], ethernet_header->h_dest[2], ethernet_header->h_dest[3], ethernet_header->h_dest[4], ethernet_header->h_dest[5]);
     printf("\t|-Protocol            : %u\n", (int)ethernet_header->h_proto);
@@ -78,7 +78,7 @@ static void print_tcp_packet(char *buffer, size_t size) {
 
     print_ip_header(buffer, size);
 
-    printf("TCP Header\n");
+    printf("\nTCP Header\n");
     printf("\t|-Source Port        : %u\n", ntohs(tcp_header->source));
     printf("\t|-Destination Port   : %u\n", ntohs(tcp_header->dest));
     printf("\t|-Sequence Number    : %u\n", ntohl(tcp_header->seq));
