@@ -2,14 +2,14 @@
 
 #include "../include/std_include.h"
 
-#define PROTOCOLS 7
+#define MAX_PROTOCOLS 7
 
 static void print_ethernet_header(char *buffer, size_t size);
 static void print_ip_header(char *buffer, size_t size);
 static void print_hex_data(char *buffer, size_t size);
 static void print_tcp_packet(char *buffer, size_t size);
 
-static void (*protocol_to_print[PROTOCOLS])(char *buffer, size_t size) = {
+static void (*protocol_to_print[MAX_PROTOCOLS])(char *buffer, size_t size) = {
     NULL,
     NULL,
     NULL,
@@ -21,8 +21,9 @@ static void (*protocol_to_print[PROTOCOLS])(char *buffer, size_t size) = {
 
 void print_packet(char *buffer, size_t size) {
     struct iphdr *ip_header = (struct iphdr *)(buffer + sizeof(struct ethhdr));
+    int protocol = ip_header->protocol;
 
-    if (protocol_to_print[ip_header->protocol] != NULL)
+    if (protocol < MAX_PROTOCOLS && protocol_to_print[protocol] != NULL)
         protocol_to_print[ip_header->protocol](buffer, size);
     else
         printf("protocol not supported.\n");
@@ -63,19 +64,13 @@ static void print_ip_header(char *buffer, size_t size) {
 }
 
 static void print_hex_data(char *buffer, size_t size) {
-    int i, j = 0;
+    int i;
 
     for (i = 0; i < size; i++) {
-        if (i % 16 == 0) {
-            printf("  ");
-            printf("%.2X", (unsigned char)buffer[i]);
-            j++;
+        if (i != 0 && i % 16 == 0)
+            printf("\n");
 
-            if (j == 15) {
-                j = 0;
-                printf("\n");
-            }
-        }
+        printf("  %02X", (int)buffer[i] & 0xff);
     }
 }
 
