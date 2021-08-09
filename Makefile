@@ -10,6 +10,10 @@ BIN := $(BIN_DIR)/sniffer-app
 
 all: dirs $(BIN)
 
+release: FLAGS := -Wall -O2
+release: clean
+release: dirs $(BIN)
+
 dirs:
 	mkdir -p bin
 	mkdir -p obj
@@ -19,9 +23,6 @@ $(BIN): $(OBJS)
 
 $(OBJ)/%.o: $(SRC)/%.c
 	$(CC) $(FLAGS) -c $< -o $@
-
-run:
-	sudo ./bin/
 
 clean:
 	$(RM) -r $(BIN_DIR)/* $(OBJ)/*
