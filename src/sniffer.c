@@ -3,7 +3,7 @@
 #include "../include/printer.h"
 #include "../include/std_include.h"
 
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 256
 
 static volatile bool alive = true;
 
@@ -22,6 +22,8 @@ int sniff_packets(int raw_sd) {
     size_t saddr_size, data_size;
     struct sockaddr saddr;
     char buffer[BUFFER_SIZE];
+
+    printf("Sniffing Packets...\n");
 
     while (alive) {
         data_size = recvfrom(raw_sd, buffer, BUFFER_SIZE, 0, &saddr, (socklen_t *)&saddr_size);

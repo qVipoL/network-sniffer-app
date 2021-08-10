@@ -2,31 +2,55 @@
 
 #include "../include/std_include.h"
 
-#define MAX_PROTOCOLS 7
+#define PROTOCOLS_MAX 18
 
 static void print_ethernet_header(char *buffer, size_t size);
 static void print_ip_header(char *buffer, size_t size);
 static void print_hex_data(char *buffer, size_t size);
 static void print_tcp_packet(char *buffer, size_t size);
+static void print_icmp_packet(char *buffer, size_t size);
+static void print_udp_packet(char *buffer, size_t size);
 
-static void (*protocol_to_print[MAX_PROTOCOLS])(char *buffer, size_t size) = {
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    print_tcp_packet  // 6 - TCP protocol
-};
+static void (*protocol_to_printer[PROTOCOLS_MAX])(char *buffer, size_t size) = {NULL};
+
+int init_printer(char *options) {
+    while (*options) {
+        switch (*options) {
+            case 'i':  // ICMP
+                protocol_to_printer[1] = &print_icmp_packet;
+                break;
+
+            case 't':  // TCP
+                protocol_to_printer[6] = &print_tcp_packet;
+                break;
+
+            case 'u':  // UDP
+                protocol_to_printer[17] = &print_udp_packet;
+                break;
+
+            default:
+                return -1;
+        }
+
+        options++;
+    }
+
+    return 0;
+}
+
+void display_printer_options() {
+    printf("Printing Options: \n");
+    printf("-i -> ICMP packets\n");
+    printf("-t -> TCP packets\n");
+    printf("-u -> UDP packets\n");
+}
 
 void print_packet(char *buffer, size_t size) {
     struct iphdr *ip_header = (struct iphdr *)(buffer + sizeof(struct ethhdr));
     int protocol = ip_header->protocol;
 
-    if (protocol < MAX_PROTOCOLS && protocol_to_print[protocol] != NULL)
-        protocol_to_print[ip_header->protocol](buffer, size);
-    else
-        printf("protocol not supported.\n");
+    if (protocol < PROTOCOLS_MAX && protocol_to_printer[protocol] != NULL)
+        protocol_to_printer[protocol](buffer, size);
 }
 
 static void print_ethernet_header(char *buffer, size_t size) {
@@ -106,6 +130,55 @@ static void print_tcp_packet(char *buffer, size_t size) {
     printf("\t|-Urgent Pointer    : %d\n", tcp_header->urg_ptr);
     printf("\nData\n");
     print_hex_data(buffer + tcp_header_size, size - tcp_header_size);
+
+    printf("\n**********************************************************\n");
+}
+
+static void print_icmp_packet(char *buffer, size_t size) {
+    int ip_header_size, icmp_header_size;
+    struct iphdr *ip_header;
+    struct icmphdr *icmp_header;
+
+    ip_header = (struct iphdr *)(buffer + sizeof(struct ethhdr));
+    ip_header_size = ip_header->ihl * 4;
+    icmp_header = (struct icmphdr *)(buffer + ip_header_size + sizeof(struct ethhdr));
+    icmp_header_size = sizeof(struct ethhdr) + ip_header_size + sizeof(icmp_header);
+
+    printf("\n***********************ICMP Packet*************************\n");
+
+    print_ip_header(buffer, size);
+
+    printf("\nICMP Header\n");
+    printf("\t|-Type     : %d\n", (int)(icmp_header->type));
+    printf("\t|-Code     : %d\n", (int)(icmp_header->code));
+    printf("\t|-Checksum : %d\n", ntohs(icmp_header->checksum));
+    printf("\nData\n");
+    print_hex_data(buffer + icmp_header_size, (size - icmp_header_size));
+
+    printf("\n***********************************************************\n");
+}
+
+static void print_udp_packet(char *buffer, size_t size) {
+    int ip_header_size, udp_header_size;
+    struct iphdr *ip_header;
+    struct udphdr *udp_header;
+
+    ip_header = (struct iphdr *)(buffer + sizeof(struct ethhdr));
+    ip_header_size = ip_header->ihl * 4;
+    udp_header = (struct udphdr *)(buffer + ip_header_size + sizeof(struct ethhdr));
+    udp_header_size = sizeof(struct ethhdr) + ip_header_size + sizeof(udp_header);
+
+    printf("\n***********************UDP Packet*************************\n");
+
+    print_ip_header(buffer, size);
+
+    printf("\nTCP Header\n");
+    printf("\t|-Source Port       : %d\n", ntohs(udp_header->source));
+    printf("\t|-Destination Port  : %d\n", ntohs(udp_header->dest));
+    printf("\t|-Length            : %d\n", ntohs(udp_header->len));
+    printf("\t|-Checksum          : %d\n", ntohs(udp_header->check));
+    printf("\nData\n");
+    print_hex_data(buffer + udp_header_size, size - udp_header_size);
 
     printf("\n**********************************************************\n");
 }
